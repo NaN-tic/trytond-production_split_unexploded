@@ -49,7 +49,9 @@ class ProductionSplitTestCase(unittest.TestCase):
             warehouse, = self.location.search([('code', '=', 'WH')])
             warehouse.production_location = production_loc
             warehouse.save()
-            company, = self.company.search([('rec_name', '=', 'B2CK')])
+            company, = self.company.search([
+                    ('rec_name', '=', 'Dunder Mifflin'),
+                    ])
             self.user.write([self.user(USER)], {
                     'main_company': company.id,
                     'company': company.id,
