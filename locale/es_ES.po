@@ -7,7 +7,7 @@ msgid ""
 "Production \"%s\" must have product and quantity defined in order to be "
 "splited."
 msgstr ""
-"La producción \"%s\" debe tener definidos un producto i una cantidad para "
+"La producción \"%s\" debe tener definidos un producto y una cantidad para "
 "poder ser separado."
 
 msgctxt "field:production.split.start,count:"
