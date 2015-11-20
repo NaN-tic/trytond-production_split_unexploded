@@ -116,8 +116,10 @@ class ProductionSplitTestCase(unittest.TestCase):
                 return production
 
             production = create_production(10)
+            self.assertEqual(production.code, '1')
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
+            self.assertEqual([p.code for p in productions], ['1-1', '1-2'])
             self.assertEqual([m.quantity for m in productions], [5, 5])
             self.assertEqual([sorted([m.quantity for m in p.inputs]) for p in
                     productions], [[10, 25], [10, 25]])

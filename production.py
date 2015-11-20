@@ -5,7 +5,6 @@ from trytond.wizard import Wizard, StateView, StateTransition, Button
 from trytond.pyson import Eval
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
-from itertools import izip_longest
 
 __all__ = ['Production', 'SplitProductionStart', 'SplitProduction']
 __metaclass__ = PoolMeta
@@ -45,37 +44,43 @@ class Production:
         if remainder <= quantity:
             return productions
         state = self.state
+        code = self.code
         self.write([self], {
                 'state': 'draft',
                 })
         self.write([self], {
                 'quantity': quantity,
                 'uom': uom.id,
+                'code': '%s-%s' % (code, 1)
                 })
         remainder -= quantity
         if count:
             count -= 1
+        suffix = 2
         while (remainder > quantity
                 and (count or count is None)):
-            productions.append(self._split_production(factor, quantity, uom))
+            productions.append(self._split_production(factor, quantity, uom,
+                    '%s-%s' % (code, suffix)))
             remainder -= quantity
             if count:
                 count -= 1
+            suffix += 1
         assert remainder >= 0
         if remainder:
             productions.append(self._split_production(remainder / initial,
-                    remainder, uom))
+                    remainder, uom, '%s-%s' % (code, suffix)))
         self._split_inputs_outputs(factor)
         self.write(productions, {
                 'state': state,
                 })
         return productions
 
-    def _split_production(self, factor, quantity, uom):
+    def _split_production(self, factor, quantity, uom, code):
         with Transaction().set_context(preserve_moves_state=True):
             production, = self.copy([self], {
                     'quantity': quantity,
                     'uom': uom.id,
+                    'code': code,
                     })
         production._split_inputs_outputs(factor)
         return production
