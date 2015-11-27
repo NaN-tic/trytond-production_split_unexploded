@@ -47,8 +47,6 @@ class Production:
         code = self.code
         self.write([self], {
                 'state': 'draft',
-                })
-        self.write([self], {
                 'quantity': quantity,
                 'uom': uom.id,
                 'code': '%s-%s' % (code, 1)
@@ -86,21 +84,28 @@ class Production:
         return production
 
     def _split_inputs_outputs(self, factor):
+        pool = Pool()
+        Move = pool.get('stock.move')
+        moves = list(self.inputs + self.outputs)
+        reset_state, to_write = [], []
         for input_ in self.inputs:
             state = input_.state
+            to_write.extend(([input_], {
+                        'quantity': input_.uom.round(input_.quantity * factor,
+                            input_.uom.rounding),
+                        }))
             if state != 'draft':
-                input_.state = 'draft'
-                input_.save()
-            input_.quantity = input_.uom.round(input_.quantity * factor,
-                input_.uom.rounding)
-            input_.save()
-            if state != 'draft':
-                input_.state = state
-                input_.save()
+                reset_state.extend(([input_], {'state': state}))
         for output in self.outputs:
-            output.quantity = output.uom.round(output.quantity * factor,
-                output.uom.rounding)
-            output.save()
+            to_write.extend(([output], {
+                        'quantity': output.uom.round(output.quantity * factor,
+                            output.uom.rounding),
+                        }))
+        Move.write(moves, {'state': 'draft'})
+        if to_write:
+            Move.write(*to_write)
+        if reset_state:
+            Move.write(*reset_state)
 
 
 class SplitProductionStart(ModelView):
