@@ -44,12 +44,12 @@ class Production:
         if remainder <= quantity:
             return productions
         state = self.state
-        code = self.code
+        number = self.number
         self.write([self], {
                 'state': 'draft',
                 'quantity': quantity,
                 'uom': uom.id,
-                'code': '%s-%s' % (code, 1)
+                'number': '%s-%s' % (number, 1)
                 })
         remainder -= quantity
         if count:
@@ -58,7 +58,7 @@ class Production:
         while (remainder > quantity
                 and (count or count is None)):
             productions.append(self._split_production(factor, quantity, uom,
-                    '%s-%s' % (code, suffix)))
+                    '%s-%s' % (number, suffix)))
             remainder -= quantity
             if count:
                 count -= 1
@@ -66,19 +66,19 @@ class Production:
         assert remainder >= 0
         if remainder:
             productions.append(self._split_production(remainder / initial,
-                    remainder, uom, '%s-%s' % (code, suffix)))
+                    remainder, uom, '%s-%s' % (number, suffix)))
         self._split_inputs_outputs(factor)
         self.write(productions, {
                 'state': state,
                 })
         return productions
 
-    def _split_production(self, factor, quantity, uom, code):
+    def _split_production(self, factor, quantity, uom, number):
         with Transaction().set_context(preserve_moves_state=True):
             production, = self.copy([self], {
                     'quantity': quantity,
                     'uom': uom.id,
-                    'code': code,
+                    'number': number,
                     })
         production._split_inputs_outputs(factor)
         return production
@@ -91,15 +91,13 @@ class Production:
         for input_ in self.inputs:
             state = input_.state
             to_write.extend(([input_], {
-                        'quantity': input_.uom.round(input_.quantity * factor,
-                            input_.uom.rounding),
+                        'quantity': input_.uom.round(input_.quantity * factor),
                         }))
             if state != 'draft':
                 reset_state.extend(([input_], {'state': state}))
         for output in self.outputs:
             to_write.extend(([output], {
-                        'quantity': output.uom.round(output.quantity * factor,
-                            output.uom.rounding),
+                        'quantity': output.uom.round(output.quantity * factor),
                         }))
         Move.write(moves, {'state': 'draft'})
         if to_write:
