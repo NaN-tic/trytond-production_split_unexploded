@@ -1,56 +1,42 @@
-#!/usr/bin/env python
-# The COPYRIGHT file at the top level of this repository contains the full
-# copyright notices and license terms.
-from decimal import Decimal
+# This file is part of Tryton.  The COPYRIGHT file at the top level of
+# this repository contains the full copyright notices and license terms.
 import unittest
+from decimal import Decimal
+
 import trytond.tests.test_tryton
-from trytond.tests.test_tryton import POOL, DB_NAME, USER, CONTEXT, test_view,\
-    test_depends
-from trytond.transaction import Transaction
+from trytond.tests.test_tryton import ModuleTestCase, with_transaction
+from trytond.pool import Pool
+
+from trytond.modules.company.tests import create_company, set_company
 
 
-class ProductionSplitTestCase(unittest.TestCase):
+class ProductionSplitTestCase(ModuleTestCase):
     'Test production_split module'
+    module = 'production_split'
 
-    def setUp(self):
-        trytond.tests.test_tryton.install_module('production_split')
-        self.uom = POOL.get('product.uom')
-        self.template = POOL.get('product.template')
-        self.product = POOL.get('product.product')
-        self.production = POOL.get('production')
-        self.bom = POOL.get('production.bom')
-        self.location = POOL.get('stock.location')
-        self.company = POOL.get('company.company')
-        self.user = POOL.get('res.user')
-        self.move = POOL.get('stock.move')
-        self.inventory = POOL.get('stock.inventory')
-
-    def test0005views(self):
-        'Test views'
-        test_view('production_split')
-
-    def test0006depends(self):
-        'Test depends'
-        test_depends()
-
+    @with_transaction()
     def test0010split(self):
         'Test split production'
-        with Transaction().start(DB_NAME, USER, context=CONTEXT):
-            input_, = self.location.search([('code', '=', 'IN')])
-            storage, = self.location.search([('code', '=', 'STO')])
-            production_loc, = self.location.search([('code', '=', 'PROD')])
-            warehouse, = self.location.search([('code', '=', 'WH')])
+        pool = Pool()
+        Uom = pool.get('product.uom')
+        Template = pool.get('product.template')
+        Product = pool.get('product.product')
+        Production = pool.get('production')
+        Bom = pool.get('production.bom')
+        Location = pool.get('stock.location')
+        Inventory = pool.get('stock.inventory')
+
+        # Create Company
+        company = create_company()
+        with set_company(company):
+            input_, = Location.search([('code', '=', 'IN')])
+            storage, = Location.search([('code', '=', 'STO')])
+            production_loc, = Location.search([('code', '=', 'PROD')])
+            warehouse, = Location.search([('code', '=', 'WH')])
             warehouse.production_location = production_loc
             warehouse.save()
-            company, = self.company.search([
-                    ('rec_name', '=', 'Dunder Mifflin'),
-                    ])
-            self.user.write([self.user(USER)], {
-                    'main_company': company.id,
-                    'company': company.id,
-                    })
-            unit, = self.uom.search([('name', '=', 'Unit')])
-            template, = self.template.create([{
+            unit, = Uom.search([('name', '=', 'Unit')])
+            template, = Template.create([{
                         'name': 'Product',
                         'type': 'goods',
                         'cost_price_method': 'fixed',
@@ -58,10 +44,10 @@ class ProductionSplitTestCase(unittest.TestCase):
                         'list_price': Decimal(5),
                         'cost_price': Decimal(1),
                         }])
-            product, = self.product.create([{
+            product, = Product.create([{
                         'template': template.id,
                         }])
-            template1, = self.template.create([{
+            template1, = Template.create([{
                         'name': 'Component 1',
                         'type': 'goods',
                         'cost_price_method': 'fixed',
@@ -69,10 +55,10 @@ class ProductionSplitTestCase(unittest.TestCase):
                         'list_price': Decimal(5),
                         'cost_price': Decimal(1),
                         }])
-            component1, = self.product.create([{
+            component1, = Product.create([{
                         'template': template1.id,
                         }])
-            template2, = self.template.create([{
+            template2, = Template.create([{
                         'name': 'Component 2',
                         'type': 'goods',
                         'cost_price_method': 'fixed',
@@ -80,11 +66,11 @@ class ProductionSplitTestCase(unittest.TestCase):
                         'list_price': Decimal(5),
                         'cost_price': Decimal(2),
                         }])
-            component2, = self.product.create([{
+            component2, = Product.create([{
                         'template': template2.id,
                         }])
 
-            bom, = self.bom.create([{
+            bom, = Bom.create([{
                         'name': 'Product',
                         'inputs': [('create', [{
                                         'product': component1.id,
@@ -103,7 +89,7 @@ class ProductionSplitTestCase(unittest.TestCase):
                         }])
 
             def create_production(quantity):
-                production, = self.production.create([{
+                production, = Production.create([{
                             'product': product.id,
                             'bom': bom.id,
                             'uom': unit.id,
@@ -116,10 +102,10 @@ class ProductionSplitTestCase(unittest.TestCase):
                 return production
 
             production = create_production(10)
-            self.assertEqual(production.code, '1')
+            self.assertEqual(production.number, '1')
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
-            self.assertEqual([p.code for p in productions], ['1-1', '1-2'])
+            self.assertEqual([p.number for p in productions], ['1-1', '1-2'])
             self.assertEqual([m.quantity for m in productions], [5, 5])
             self.assertEqual([sorted([m.quantity for m in p.inputs]) for p in
                     productions], [[10, 25], [10, 25]])
@@ -171,14 +157,14 @@ class ProductionSplitTestCase(unittest.TestCase):
                     productions], [[5], [5]])
 
             production = create_production(10)
-            self.production.wait([production])
+            Production.wait([production])
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
             self.assertEqual([m.quantity for m in productions], [5, 5])
             self.assertEqual([m.state for m in productions],
                 ['waiting', 'waiting'])
 
-            inventory, = self.inventory.create([{
+            inventory, = Inventory.create([{
                         'company': company.id,
                         'location': storage.id,
                         'lines': [('create', [{
@@ -189,11 +175,11 @@ class ProductionSplitTestCase(unittest.TestCase):
                                         'quantity': 20,
                                         }])],
                         }])
-            self.inventory.confirm([inventory])
+            Inventory.confirm([inventory])
 
             production = create_production(10)
-            self.production.wait([production])
-            self.assertEqual(self.production.assign_try([production]), True)
+            Production.wait([production])
+            self.assertEqual(Production.assign_try([production]), True)
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
             self.assertEqual([m.quantity for m in productions], [5, 5])
@@ -221,7 +207,7 @@ class ProductionSplitTestCase(unittest.TestCase):
             production.save()
 
             production = create_production(10)
-            self.production.write([production], {
+            Production.write([production], {
                     'bom': None,
                     'outputs': [('create', [{
                                     'product': component2.id,
@@ -246,10 +232,6 @@ class ProductionSplitTestCase(unittest.TestCase):
 
 def suite():
     suite = trytond.tests.test_tryton.suite()
-    from trytond.modules.company.tests import test_company
-    for test in test_company.suite():
-        if test not in suite:
-            suite.addTest(test)
     suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
             ProductionSplitTestCase))
     return suite
