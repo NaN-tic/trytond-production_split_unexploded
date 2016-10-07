@@ -65,7 +65,7 @@ class Production:
                 output.product.default_uom,
                 round=False)
 
-        code = self.number
+        number = self.number
         state = self.state
         suffix = 1
         # The last "cut" is done after the loop
@@ -76,7 +76,7 @@ class Production:
         while ((remainder - quantity) >= uom.rounding  # remainder > quantity
                 and (count or count is None)):
             productions.append(self._split_production(
-                    '%s-%s' % (code, suffix), quantity, uom, input2qty,
+                    '%s-%s' % (number, suffix), quantity, uom, input2qty,
                     output2qty))
             remainder -= quantity
             if count:
@@ -86,10 +86,10 @@ class Production:
         assert remainder > uom.rounding
         # The initial production contains the remaining quantity
         productions.append(self._split_production(
-                '%s-%s' % (code, suffix), quantity, uom, input2qty,
+                '%s-%s' % (number, suffix), quantity, uom, input2qty,
                 output2qty))
         self.write([self], {
-                'number': '%s-%s' % (code, suffix + 1),
+                'number': '%s-%s' % (number, suffix + 1),
                 'quantity': remainder,
                 'uom': uom.id,
                 'state': state,
@@ -98,9 +98,9 @@ class Production:
         productions.append(self)
         return productions
 
-    def _split_production(self, code, quantity, uom, input2qty, output2qty):
+    def _split_production(self, number, quantity, uom, input2qty, output2qty):
         production, = self.copy([self], {
-                'code': code,
+                'number': number,
                 'quantity': quantity,
                 'uom': uom.id,
                 'inputs': None,

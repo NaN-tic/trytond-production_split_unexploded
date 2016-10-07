@@ -117,7 +117,7 @@ class ProductionSplitTestCase(ModuleTestCase):
             self.assertEqual(production.number, '1')
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
-            self.assertEqual([p.number for p in productions], [u'2', u'1-2'])
+            self.assertEqual([p.number for p in productions], [u'1-1', u'1-2'])
             self.assertEqual([m.quantity for m in productions], [5.0, 5.0])
             self.assertEqual([sorted([m.quantity for m in p.inputs]) for p in
                     productions], [[10.0, 25.0], [10.0, 25.0]])
