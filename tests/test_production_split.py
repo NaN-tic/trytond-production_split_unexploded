@@ -25,6 +25,7 @@ class ProductionSplitTestCase(ModuleTestCase):
         Bom = pool.get('production.bom')
         Location = pool.get('stock.location')
         Inventory = pool.get('stock.inventory')
+        Move = pool.get('stock.move')
 
         # Create Company
         company = create_company()
@@ -35,7 +36,18 @@ class ProductionSplitTestCase(ModuleTestCase):
             warehouse, = Location.search([('code', '=', 'WH')])
             warehouse.production_location = production_loc
             warehouse.save()
+
             unit, = Uom.search([('name', '=', 'Unit')])
+            box5 = Uom(
+                name='Box of 5',
+                symbol='b5',
+                category=unit.category,
+                factor=5,
+                rate=0.2,
+                rounding=1,
+                digits=0)
+            box5.save()
+
             template, = Template.create([{
                         'name': 'Product',
                         'type': 'goods',
@@ -105,12 +117,12 @@ class ProductionSplitTestCase(ModuleTestCase):
             self.assertEqual(production.number, '1')
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
-            self.assertEqual([p.number for p in productions], ['1-1', '1-2'])
-            self.assertEqual([m.quantity for m in productions], [5, 5])
+            self.assertEqual([p.number for p in productions], [u'2', u'1-2'])
+            self.assertEqual([m.quantity for m in productions], [5.0, 5.0])
             self.assertEqual([sorted([m.quantity for m in p.inputs]) for p in
-                    productions], [[10, 25], [10, 25]])
+                    productions], [[10.0, 25.0], [10.0, 25.0]])
             self.assertEqual([[m.quantity for m in p.outputs] for p in
-                    productions], [[5], [5]])
+                    productions], [[5.0], [5.0]])
 
             production = create_production(13)
             productions = production.split(5, unit)
@@ -156,12 +168,91 @@ class ProductionSplitTestCase(ModuleTestCase):
             self.assertEqual([[m.quantity for m in p.outputs] for p in
                     productions], [[5], [5]])
 
+            # Productions with two moves for the same input with different UoM
+            complex_production = create_production(20)
+            component1_move, = [m for m in complex_production.inputs
+                if m.product == component1]
+            self.assertEqual(component1_move.quantity, 100)
+            component1_move2, = Move.copy([component1_move], {
+                    'quantity': 10,
+                    'uom': box5.id,
+                    })
+            component1_move.quantity = 50
+            component1_move.save()
+
+            production, = Production.copy([complex_production])
+            # split in 2 equal productions: input moves are not splitted
+            productions = production.split(10, unit)
+            self.assertEqual(len(productions), 2)
+            self.assertEqual([m.quantity for m in productions], [10, 10])
+            self.assertEqual(sorted([sorted([(m.quantity, m.uom.symbol)
+                                for m in p.inputs]) for p in productions]),
+                [[(10, u'b5'), (20, u'u')], [(20, u'u'), (50, u'u')]])
+            self.assertEqual([[m.quantity for m in p.outputs] for p in
+                    productions], [[10], [10]])
+
+            production, = Production.copy([complex_production])
+            # split in 4 equal productions: input moves splitted
+            productions = production.split(5, unit)
+            self.assertEqual(len(productions), 4)
+            self.assertEqual([m.quantity for m in productions], [5, 5, 5, 5])
+            self.assertEqual(sorted([sorted([(m.quantity, m.uom.symbol)
+                                for m in p.inputs]) for p in productions]),
+                [[(5, u'b5'), (10, u'u')], [(5, u'b5'), (10, u'u')],
+                    [(10, u'u'), (25, u'u')], [(10, u'u'), (25, u'u')]])
+            self.assertEqual([[m.quantity for m in p.outputs] for p in
+                    productions], [[5], [5], [5], [5]])
+
+            production, = Production.copy([complex_production])
+            # split in 3 NON equal productions: input moves splitted
+            productions = production.split(5, unit, count=2)
+            self.assertEqual(len(productions), 3)
+            res = sorted([(p.quantity, sorted([(m.quantity, m.uom.symbol)
+                                for m in p.inputs])) for p in productions])
+            try:
+                self.assertEqual(res, [
+                        (5, [(5, u'b5'), (10, u'u')]),
+                        (5, [(5, u'b5'), (10, u'u')]),
+                        (10, [(20, u'u'), (50, u'u')]),
+                        ])
+            except AssertionError:
+                # We can not supose how will be exactly splitted
+                self.assertEqual(res, [
+                        (5, [(10, u'u'), (25, u'u')]),
+                        (5, [(10, u'u'), (25, u'u')]),
+                        (10, [(10, u'b5'), (20, u'u')]),
+                        ])
+            self.assertEqual([(p.quantity, [m.quantity for m in p.outputs])
+                    for p in productions],
+                [(5, [5]), (5, [5]), (10, [10])])
+
+            production, = Production.copy([complex_production])
+            # split in 3 NON equal productions and different production UoM
+            productions = production.split(1, box5, count=2)
+            self.assertEqual(len(productions), 3)
+            res = sorted([(p.quantity, sorted([(m.quantity, m.uom.symbol)
+                                for m in p.inputs])) for p in productions])
+            try:
+                self.assertEqual(res, [
+                        (1, [(5, u'b5'), (10, u'u')]),
+                        (2, [(5, u'b5'), (10, u'u')]),
+                        (2, [(20, u'u'), (50, u'u')]),
+                        ])
+            except AssertionError:
+                # We can not supose how will be exactly splitted
+                self.assertEqual(res, [
+                        (1, [(10, u'u'), (25, u'u')]),
+                        (1, [(10, u'u'), (25, u'u')]),
+                        (2, [(10, u'b5'), (20, u'u')]),
+                        ])
+
+            # Split in non draft state
             production = create_production(10)
             Production.wait([production])
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
-            self.assertEqual([m.quantity for m in productions], [5, 5])
-            self.assertEqual([m.state for m in productions],
+            self.assertEqual([p.quantity for p in productions], [5, 5])
+            self.assertEqual([p.state for p in productions],
                 ['waiting', 'waiting'])
 
             inventory, = Inventory.create([{
