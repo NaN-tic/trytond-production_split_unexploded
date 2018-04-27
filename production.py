@@ -7,11 +7,11 @@ from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
 
 __all__ = ['Production', 'SplitProductionStart', 'SplitProduction']
-__metaclass__ = PoolMeta
 
 
 class Production:
     __name__ = 'production'
+    __metaclass__ = PoolMeta
 
     @classmethod
     def __setup__(cls):

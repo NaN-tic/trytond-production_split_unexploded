@@ -54,10 +54,11 @@ class ProductionSplitTestCase(ModuleTestCase):
                         'cost_price_method': 'fixed',
                         'default_uom': unit.id,
                         'list_price': Decimal(5),
-                        'cost_price': Decimal(1),
+                        'producible': True,
                         }])
             product, = Product.create([{
                         'template': template.id,
+                        'cost_price': Decimal(1),
                         }])
             template1, = Template.create([{
                         'name': 'Component 1',
@@ -65,10 +66,10 @@ class ProductionSplitTestCase(ModuleTestCase):
                         'cost_price_method': 'fixed',
                         'default_uom': unit.id,
                         'list_price': Decimal(5),
-                        'cost_price': Decimal(1),
                         }])
             component1, = Product.create([{
                         'template': template1.id,
+                        'cost_price': Decimal(1),
                         }])
             template2, = Template.create([{
                         'name': 'Component 2',
@@ -76,10 +77,10 @@ class ProductionSplitTestCase(ModuleTestCase):
                         'cost_price_method': 'fixed',
                         'default_uom': unit.id,
                         'list_price': Decimal(5),
-                        'cost_price': Decimal(2),
                         }])
             component2, = Product.create([{
                         'template': template2.id,
+                        'cost_price': Decimal(1),
                         }])
 
             bom, = Bom.create([{

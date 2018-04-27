@@ -21,5 +21,10 @@
             <field name="name">split_start_form</field>
         </record>
 
+        <record model="ir.model.button" id="split_wizard_button">
+            <field name="name">split_wizard</field>
+            <field name="string">Split</field>
+            <field name="model" search="[('model', '=', 'production')]"/>
+        </record>
     </data>
 </tryton>
