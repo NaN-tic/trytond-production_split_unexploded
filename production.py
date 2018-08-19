@@ -9,9 +9,8 @@ from trytond.transaction import Transaction
 __all__ = ['Production', 'SplitProductionStart', 'SplitProduction']
 
 
-class Production:
+class Production(metaclass=PoolMeta):
     __name__ = 'production'
-    __metaclass__ = PoolMeta
 
     @classmethod
     def __setup__(cls):
