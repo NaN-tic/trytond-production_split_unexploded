@@ -118,7 +118,7 @@ class ProductionSplitTestCase(ModuleTestCase):
             self.assertEqual(production.number, '1')
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
-            self.assertEqual([p.number for p in productions], ['1-1', '1-2'])
+            self.assertEqual([p.number for p in productions], [u'1-2', u'1-1'])
             self.assertEqual([m.quantity for m in productions], [5.0, 5.0])
             self.assertEqual([sorted([m.quantity for m in p.inputs]) for p in
                     productions], [[10.0, 25.0], [10.0, 25.0]])
@@ -188,7 +188,7 @@ class ProductionSplitTestCase(ModuleTestCase):
             self.assertEqual([m.quantity for m in productions], [10, 10])
             self.assertEqual(sorted([sorted([(m.quantity, m.uom.symbol)
                                 for m in p.inputs]) for p in productions]),
-                [[(10, 'b5'), (20, 'u')], [(20, 'u'), (50, 'u')]])
+                [[(10, u'b5'), (20, u'u')], [(20, u'u'), (50, u'u')]])
             self.assertEqual([[m.quantity for m in p.outputs] for p in
                     productions], [[10], [10]])
 
@@ -199,8 +199,8 @@ class ProductionSplitTestCase(ModuleTestCase):
             self.assertEqual([m.quantity for m in productions], [5, 5, 5, 5])
             self.assertEqual(sorted([sorted([(m.quantity, m.uom.symbol)
                                 for m in p.inputs]) for p in productions]),
-                [[(5, 'b5'), (10, 'u')], [(5, 'b5'), (10, 'u')],
-                    [(10, 'u'), (25, 'u')], [(10, 'u'), (25, 'u')]])
+                [[(5, u'b5'), (10, u'u')], [(5, u'b5'), (10, u'u')],
+                    [(10, u'u'), (25, u'u')], [(10, u'u'), (25, u'u')]])
             self.assertEqual([[m.quantity for m in p.outputs] for p in
                     productions], [[5], [5], [5], [5]])
 
@@ -212,16 +212,16 @@ class ProductionSplitTestCase(ModuleTestCase):
                                 for m in p.inputs])) for p in productions])
             try:
                 self.assertEqual(res, [
-                        (5, [(5, 'b5'), (10, 'u')]),
-                        (5, [(5, 'b5'), (10, 'u')]),
-                        (10, [(20, 'u'), (50, 'u')]),
+                        (5, [(5, u'b5'), (10, u'u')]),
+                        (5, [(5, u'b5'), (10, u'u')]),
+                        (10, [(20, u'u'), (50, u'u')]),
                         ])
             except AssertionError:
                 # We can not supose how will be exactly splitted
                 self.assertEqual(res, [
-                        (5, [(10, 'u'), (25, 'u')]),
-                        (5, [(10, 'u'), (25, 'u')]),
-                        (10, [(10, 'b5'), (20, 'u')]),
+                        (5, [(10, u'u'), (25, u'u')]),
+                        (5, [(10, u'u'), (25, u'u')]),
+                        (10, [(10, u'b5'), (20, u'u')]),
                         ])
             self.assertEqual([(p.quantity, [m.quantity for m in p.outputs])
                     for p in productions],
@@ -235,16 +235,16 @@ class ProductionSplitTestCase(ModuleTestCase):
                                 for m in p.inputs])) for p in productions])
             try:
                 self.assertEqual(res, [
-                        (1, [(5, 'b5'), (10, 'u')]),
-                        (2, [(5, 'b5'), (10, 'u')]),
-                        (2, [(20, 'u'), (50, 'u')]),
+                        (1, [(5, u'b5'), (10, u'u')]),
+                        (2, [(5, u'b5'), (10, u'u')]),
+                        (2, [(20, u'u'), (50, u'u')]),
                         ])
             except AssertionError:
                 # We can not supose how will be exactly splitted
                 self.assertEqual(res, [
-                        (1, [(10, 'u'), (25, 'u')]),
-                        (1, [(10, 'u'), (25, 'u')]),
-                        (2, [(10, 'b5'), (20, 'u')]),
+                        (1, [(10, u'u'), (25, u'u')]),
+                        (1, [(10, u'u'), (25, u'u')]),
+                        (2, [(10, u'b5'), (20, u'u')]),
                         ])
 
             # Split in non draft state
@@ -281,10 +281,9 @@ class ProductionSplitTestCase(ModuleTestCase):
                     productions], [[10, 25], [10, 25]])
             self.assertEqual([[m.quantity for m in p.outputs] for p in
                     productions], [[5], [5]])
-            result = []
-            for production in productions:
-                result += [m.state == 'draft' for m in production.outputs]
-            self.assertTrue(all(result))
+            for p in productions:
+                self.assertEqual(all([m.state == 'draft' for m in p.outputs]),
+                    True)
 
             production = create_production(10)
             production.bom == None

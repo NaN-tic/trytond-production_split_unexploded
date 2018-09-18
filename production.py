@@ -66,7 +66,7 @@ class Production(metaclass=PoolMeta):
 
         number = self.number
         state = self.state
-        suffix = 1
+        suffix = 2
         # The last "cut" is done after the loop
         remainder -= quantity
         if count:
@@ -88,7 +88,7 @@ class Production(metaclass=PoolMeta):
                 '%s-%s' % (number, suffix), quantity, uom, input2qty,
                 output2qty))
         self.write([self], {
-                'number': '%s-%s' % (number, suffix + 1),
+                'number': '%s-%s' % (number, 1),
                 'quantity': remainder,
                 'uom': uom.id,
                 'state': state,
