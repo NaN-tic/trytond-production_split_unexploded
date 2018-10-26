@@ -75,7 +75,7 @@ class Production(metaclass=PoolMeta):
         while ((remainder - quantity) >= uom.rounding  # remainder > quantity
                 and (count or count is None)):
             productions.append(self._split_production(
-                    '%s-%s' % (number, suffix), quantity, uom, input2qty,
+                    '%s-%02d' % (number, suffix), quantity, uom, input2qty,
                     output2qty))
             remainder -= quantity
             if count:
@@ -85,10 +85,10 @@ class Production(metaclass=PoolMeta):
         assert remainder > uom.rounding
         # The initial production contains the remaining quantity
         productions.append(self._split_production(
-                '%s-%s' % (number, suffix), quantity, uom, input2qty,
+                '%s-%02d' % (number, suffix), quantity, uom, input2qty,
                 output2qty))
         self.write([self], {
-                'number': '%s-%s' % (number, 1),
+                'number': '%s-%02d' % (number, 1),
                 'quantity': remainder,
                 'uom': uom.id,
                 'state': state,
