@@ -206,13 +206,6 @@ class SplitProduction(Wizard):
             ])
     split = StateTransition()
 
-    @classmethod
-    def __setup__(cls):
-        super(SplitProduction, cls).__setup__()
-        cls._error_messages.update({
-                'no_product_nor_quantity': ('Production "%s" must have product'
-                    ' and quantity defined in order to be splited.')
-                })
 
     def default_start(self, fields):
         pool = Pool()
@@ -220,8 +213,8 @@ class SplitProduction(Wizard):
         default = {}
         production = Production(Transaction().context['active_id'])
         if not production.product or not production.quantity:
-            self.raise_user_error('no_product_nor_quantity',
-                production.rec_name)
+            raise UserError(gettext('production_split.no_product_nor_quantity',
+                production=production.rec_name))
         if production.uom:
             default['uom'] = production.uom.id
             default['unit_digits'] = production.unit_digits
