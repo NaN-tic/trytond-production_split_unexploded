@@ -1,14 +1,6 @@
-# 
+#
 msgid ""
 msgstr "Content-Type: text/plain; charset=utf-8\n"
-
-msgctxt "error:production.split:"
-msgid ""
-"Production \"%s\" must have product and quantity defined in order to be "
-"splited."
-msgstr ""
-"La producción \"%s\" debe tener definidos un producto y una cantidad para "
-"poder ser separado."
 
 msgctxt "field:production.split.start,count:"
 msgid "Count"
@@ -16,7 +8,7 @@ msgstr "Contador"
 
 msgctxt "field:production.split.start,id:"
 msgid "ID"
-msgstr "Identificador"
+msgstr "ID"
 
 msgctxt "field:production.split.start,quantity:"
 msgid "Quantity"
@@ -37,6 +29,22 @@ msgstr "Categoría de UdM"
 msgctxt "help:production.split.start,count:"
 msgid "Maximum number of productions to create"
 msgstr "Numero maixmo de producciones a crear"
+
+msgctxt "model:ir.action,name:wizard_split_production"
+msgid "Split Production"
+msgstr "Dividir producción"
+
+msgctxt "model:ir.message,text:no_product_nor_quantity"
+msgid ""
+"Production \"%(production)s\" must have product and quantity defined in "
+"order to be splited."
+msgstr ""
+"La producción \"%(production)s\" debe tener el producto y la cantidad "
+"definidos para poder dividirse."
+
+msgctxt "model:ir.model.button,string:split_wizard_button"
+msgid "Split"
+msgstr "Dividir"
 
 msgctxt "model:production.split.start,name:"
 msgid "Split Production"
