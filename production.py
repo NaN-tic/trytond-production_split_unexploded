@@ -5,6 +5,8 @@ from trytond.wizard import Wizard, StateView, StateTransition, Button
 from trytond.pyson import Eval
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
+from trytond.exceptions import UserError
+from trytond.i18n import gettext
 
 __all__ = ['Production', 'SplitProductionStart', 'SplitProduction']
 
