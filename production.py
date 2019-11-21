@@ -1,12 +1,13 @@
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
+from decimal import Decimal
 from trytond.model import ModelView, fields
 from trytond.wizard import Wizard, StateView, StateTransition, Button
 from trytond.pyson import Eval
 from trytond.pool import Pool, PoolMeta
 from trytond.transaction import Transaction
-from trytond.exceptions import UserError
 from trytond.i18n import gettext
+from trytond.exceptions import UserError
 
 __all__ = ['Production', 'SplitProductionStart', 'SplitProduction']
 
@@ -207,7 +208,6 @@ class SplitProduction(Wizard):
             Button('Split', 'split', 'tryton-ok', default=True),
             ])
     split = StateTransition()
-
 
     def default_start(self, fields):
         pool = Pool()
