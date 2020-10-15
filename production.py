@@ -91,7 +91,7 @@ class Production(metaclass=PoolMeta):
                 output2qty))
         self.write([self], {
                 'number': '%s-%02d' % (number, 1),
-                'quantity': remainder,
+                'quantity': uom.round(remainder),
                 'uom': uom.id,
                 'state': state,
                 })
@@ -157,8 +157,8 @@ class Production(metaclass=PoolMeta):
                     })
             new_moves.append(new_move)
             to_write.extend(([move], {
-                        'quantity': move.quantity - new_move_qty,
-                        }))
+                    'quantity': move.uom.round(move.quantity - new_move_qty),
+                    }))
             if move.state != 'draft':
                 to_draft.append(move)
                 reset_state.extend(
