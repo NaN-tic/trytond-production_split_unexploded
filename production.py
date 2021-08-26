@@ -179,23 +179,14 @@ class SplitProductionStart(ModelView):
     __name__ = 'production.split.start'
     count = fields.Integer('Count', help='Maximum number of productions to'
         ' create')
-    quantity = fields.Float('Quantity', required=True,
-        digits=(16, Eval('unit_digits', 2)),
-        depends=['unit_digits'])
+    quantity = fields.Float('Quantity', required=True, digits='uom')
     uom = fields.Many2One('product.uom', 'Uom', required=True,
         domain=[
             ('category', '=', Eval('uom_category')),
             ],
         depends=['uom_category'])
-    unit_digits = fields.Integer('Unit Digits', readonly=True)
     uom_category = fields.Many2One('product.uom.category', 'Uom Category',
         readonly=True)
-
-    @fields.depends('uom')
-    def on_change_with_unit_digits(self):
-        if self.uom:
-            return self.uom.digits
-        return 2
 
 
 class SplitProduction(Wizard):
@@ -218,7 +209,6 @@ class SplitProduction(Wizard):
                 production=production.rec_name))
         if production.uom:
             default['uom'] = production.uom.id
-            default['unit_digits'] = production.unit_digits
             default['uom_category'] = production.uom.category.id
         return default
 
