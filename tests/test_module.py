@@ -1,17 +1,17 @@
+
 # This file is part of Tryton.  The COPYRIGHT file at the top level of
 # this repository contains the full copyright notices and license terms.
-import unittest
+
 from decimal import Decimal
 
-import trytond.tests.test_tryton
 from trytond.tests.test_tryton import ModuleTestCase, with_transaction
 from trytond.pool import Pool
 
-from trytond.modules.company.tests import create_company, set_company
+from trytond.modules.company.tests import create_company, set_company, CompanyTestMixin
 
 
-class ProductionSplitTestCase(ModuleTestCase):
-    'Test production_split module'
+class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
+    'Test ProductionSplit module'
     module = 'production_split'
 
     @with_transaction()
@@ -323,8 +323,4 @@ class ProductionSplitTestCase(ModuleTestCase):
                     productions], [[1, 5], [1, 5]])
 
 
-def suite():
-    suite = trytond.tests.test_tryton.suite()
-    suite.addTests(unittest.TestLoader().loadTestsFromTestCase(
-            ProductionSplitTestCase))
-    return suite
+del ModuleTestCase
