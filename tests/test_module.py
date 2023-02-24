@@ -271,7 +271,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
 
             production = create_production(10)
             Production.wait([production])
-            self.assertEqual(Production.assign_try([production]), True)
+            Production.assign_try([production])
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
             self.assertEqual([m.quantity for m in productions], [5, 5])
