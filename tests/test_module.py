@@ -88,16 +88,16 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
                         'inputs': [('create', [{
                                         'product': component1.id,
                                         'quantity': 5.0,
-                                        'uom': unit.id,
+                                        'unit': unit.id,
                                         }, {
                                         'product': component2.id,
                                         'quantity': 2.0,
-                                        'uom': unit.id,
+                                        'unit': unit.id,
                                         }])],
                         'outputs': [('create', [{
                                         'product': product.id,
                                         'quantity': 1.0,
-                                        'uom': unit.id,
+                                        'unit': unit.id,
                                         }])],
                         }])
 
@@ -105,7 +105,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
                 production, = Production.create([{
                             'product': product.id,
                             'bom': bom.id,
-                            'uom': unit.id,
+                            'unit': unit.id,
                             'quantity': quantity,
                             'warehouse': warehouse.id,
                             'location': production_loc.id,
@@ -176,7 +176,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
             self.assertEqual(component1_move.quantity, 100)
             component1_move2, = Move.copy([component1_move], {
                     'quantity': 10,
-                    'uom': box5.id,
+                    'unit': box5.id,
                     })
             component1_move.quantity = 50
             component1_move.save()
@@ -186,7 +186,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
             productions = production.split(10, unit)
             self.assertEqual(len(productions), 2)
             self.assertEqual([m.quantity for m in productions], [10, 10])
-            self.assertEqual(sorted([sorted([(m.quantity, m.uom.symbol)
+            self.assertEqual(sorted([sorted([(m.quantity, m.unit.symbol)
                                 for m in p.inputs]) for p in productions]),
                 [[(10, u'b5'), (20, u'u')], [(20, u'u'), (50, u'u')]])
             self.assertEqual([[m.quantity for m in p.outputs] for p in
@@ -197,7 +197,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 4)
             self.assertEqual([m.quantity for m in productions], [5, 5, 5, 5])
-            self.assertEqual(sorted([sorted([(m.quantity, m.uom.symbol)
+            self.assertEqual(sorted([sorted([(m.quantity, m.unit.symbol)
                                 for m in p.inputs]) for p in productions]),
                 [[(5, u'b5'), (10, u'u')], [(5, u'b5'), (10, u'u')],
                     [(10, u'u'), (25, u'u')], [(10, u'u'), (25, u'u')]])
@@ -208,7 +208,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
             # split in 3 NON equal productions: input moves splitted
             productions = production.split(5, unit, count=2)
             self.assertEqual(len(productions), 3)
-            res = sorted([(p.quantity, sorted([(m.quantity, m.uom.symbol)
+            res = sorted([(p.quantity, sorted([(m.quantity, m.unit.symbol)
                                 for m in p.inputs])) for p in productions])
             try:
                 self.assertEqual(res, [
@@ -231,7 +231,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
             # split in 3 NON equal productions and different production UoM
             productions = production.split(1, box5, count=2)
             self.assertEqual(len(productions), 3)
-            res = sorted([(p.quantity, sorted([(m.quantity, m.uom.symbol)
+            res = sorted([(p.quantity, sorted([(m.quantity, m.unit.symbol)
                                 for m in p.inputs])) for p in productions])
             try:
                 self.assertEqual(res, [
@@ -304,7 +304,7 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
                     'bom': None,
                     'outputs': [('create', [{
                                     'product': component2.id,
-                                    'uom': unit.id,
+                                    'unit': unit.id,
                                     'quantity': 2,
                                     'from_location': production_loc.id,
                                     'to_location': storage.id,

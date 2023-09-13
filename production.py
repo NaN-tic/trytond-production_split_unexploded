@@ -43,7 +43,7 @@ class Production(metaclass=PoolMeta):
         pool = Pool()
         Uom = pool.get('product.uom')
 
-        initial = remainder = Uom.compute_qty(self.uom, self.quantity, uom)
+        initial = remainder = Uom.compute_qty(self.unit, self.quantity, uom)
         if remainder <= quantity:
             # Splitted to quantity greater than produciton's quantity
             return [self]
@@ -54,7 +54,7 @@ class Production(metaclass=PoolMeta):
             # Maybe someone want customize the key of the dictionary
             input2qty.setdefault(input_.product.id, 0)
             input2qty[input_.product.id] += Uom.compute_qty(
-                input_.uom, input_.quantity * factor,
+                input_.unit, input_.quantity * factor,
                 input_.product.default_uom,
                 round=False)
         output2qty = {}  # amount for each output in splitted productions
@@ -62,7 +62,7 @@ class Production(metaclass=PoolMeta):
             # Maybe someone want customize the key of the dictionary
             output2qty.setdefault(output.product.id, 0)
             output2qty[output.product.id] += Uom.compute_qty(
-                output.uom, output.quantity * factor,
+                output.unit, output.quantity * factor,
                 output.product.default_uom,
                 round=False)
 
@@ -92,7 +92,7 @@ class Production(metaclass=PoolMeta):
         self.write([self], {
                 'number': '%s-%02d' % (number, 1),
                 'quantity': uom.round(remainder),
-                'uom': uom.id,
+                'unit': uom.id,
                 'state': state,
                 })
         self.write(productions, {'state': state})
@@ -103,7 +103,7 @@ class Production(metaclass=PoolMeta):
         production, = self.copy([self], {
                 'number': number,
                 'quantity': quantity,
-                'uom': uom.id,
+                'unit': uom.id,
                 'inputs': None,
                 'outputs': None,
                 })
@@ -129,17 +129,17 @@ class Production(metaclass=PoolMeta):
         for move in current_moves:
             pending_qty = Uom.compute_qty(
                 move.product.default_uom, product2pending_qty[move.product.id],
-                move.uom,
+                move.unit,
                 round=False)
-            if pending_qty < move.uom.rounding:
+            if pending_qty < move.unit.rounding:
                 # Leave this input to current production
                 continue
 
-            if (move.quantity - pending_qty) < move.uom.rounding:
+            if (move.quantity - pending_qty) < move.unit.rounding:
                 # move.quantity <= pending_qty
                 # Move this input to new production
                 product2pending_qty[move.product.id] -= Uom.compute_qty(
-                    move.uom, move.quantity, move.product.default_uom,
+                    move.unit, move.quantity, move.product.default_uom,
                     round=False)
                 to_write.extend(
                     ([move], {relation_field: new_production.id}))
@@ -149,7 +149,7 @@ class Production(metaclass=PoolMeta):
             # split move moving pending_qty to new production and leaving
             # remaining to current one
             product2pending_qty[move.product.id] = 0
-            new_move_qty = move.uom.round(pending_qty)
+            new_move_qty = move.unit.round(pending_qty)
             new_move, = Move.copy([move], {
                     relation_field: new_production.id,
                     'quantity': new_move_qty,
@@ -157,7 +157,7 @@ class Production(metaclass=PoolMeta):
                     })
             new_moves.append(new_move)
             to_write.extend(([move], {
-                    'quantity': move.uom.round(move.quantity - new_move_qty),
+                    'quantity': move.unit.round(move.quantity - new_move_qty),
                     }))
             if move.state != 'draft':
                 to_draft.append(move)
@@ -207,9 +207,9 @@ class SplitProduction(Wizard):
         if not production.product or not production.quantity:
             raise UserError(gettext('production_split.no_product_nor_quantity',
                 production=production.rec_name))
-        if production.uom:
-            default['uom'] = production.uom.id
-            default['uom_category'] = production.uom.category.id
+        if production.unit:
+            default['uom'] = production.unit.id
+            default['uom_category'] = production.unit.category.id
         return default
 
     def transition_split(self):
