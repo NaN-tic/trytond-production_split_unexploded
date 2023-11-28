@@ -29,6 +29,9 @@ class Production(metaclass=PoolMeta):
     def split_wizard(cls, productions):
         pass
 
+    def split_key(self, move):
+        return move.product.id
+
     def split(self, quantity, uom, count=None):
         """
         Split the production into productions of quantity.
@@ -52,16 +55,16 @@ class Production(metaclass=PoolMeta):
         input2qty = {}  # amount for each input in splitted productions
         for input_ in self.inputs:
             # Maybe someone want customize the key of the dictionary
-            input2qty.setdefault(input_.product.id, 0)
-            input2qty[input_.product.id] += Uom.compute_qty(
+            input2qty.setdefault(self.split_key(input_), 0)
+            input2qty[self.split_key(input_)] += Uom.compute_qty(
                 input_.uom, input_.quantity * factor,
                 input_.product.default_uom,
                 round=False)
         output2qty = {}  # amount for each output in splitted productions
         for output in self.outputs:
             # Maybe someone want customize the key of the dictionary
-            output2qty.setdefault(output.product.id, 0)
-            output2qty[output.product.id] += Uom.compute_qty(
+            output2qty.setdefault(self.split_key(output), 0)
+            output2qty[self.split_key(output)] += Uom.compute_qty(
                 output.uom, output.quantity * factor,
                 output.product.default_uom,
                 round=False)
@@ -128,7 +131,8 @@ class Production(metaclass=PoolMeta):
         to_draft, to_write, reset_state, new_moves = [], [], [], []
         for move in current_moves:
             pending_qty = Uom.compute_qty(
-                move.product.default_uom, product2pending_qty[move.product.id],
+                move.product.default_uom,
+                product2pending_qty[self.split_key(move)],
                 move.uom,
                 round=False)
             if pending_qty < move.uom.rounding:
@@ -138,7 +142,7 @@ class Production(metaclass=PoolMeta):
             if (move.quantity - pending_qty) < move.uom.rounding:
                 # move.quantity <= pending_qty
                 # Move this input to new production
-                product2pending_qty[move.product.id] -= Uom.compute_qty(
+                product2pending_qty[self.split_key(move)] -= Uom.compute_qty(
                     move.uom, move.quantity, move.product.default_uom,
                     round=False)
                 to_write.extend(
@@ -148,7 +152,7 @@ class Production(metaclass=PoolMeta):
 
             # split move moving pending_qty to new production and leaving
             # remaining to current one
-            product2pending_qty[move.product.id] = 0
+            product2pending_qty[self.split_key(move)] = 0
             new_move_qty = move.uom.round(pending_qty)
             new_move, = Move.copy([move], {
                     relation_field: new_production.id,
