@@ -25,7 +25,7 @@ class Production(metaclass=PoolMeta):
                 })
 
     @classmethod
-    @ModelView.button_action('production_split.wizard_split_production')
+    @ModelView.button_action('production_split_unexploded.wizard_split_production')
     def split_wizard(cls, productions):
         pass
 
@@ -197,7 +197,7 @@ class SplitProduction(Wizard):
     'Split Production'
     __name__ = 'production.split'
     start = StateView('production.split.start',
-        'production_split.split_start_view_form', [
+        'production_split_unexploded.split_start_view_form', [
             Button('Cancel', 'end', 'tryton-cancel'),
             Button('Split', 'split', 'tryton-ok', default=True),
             ])
@@ -209,7 +209,7 @@ class SplitProduction(Wizard):
         default = {}
         production = Production(Transaction().context['active_id'])
         if not production.product or not production.quantity:
-            raise UserError(gettext('production_split.no_product_nor_quantity',
+            raise UserError(gettext('production_split_unexploded.no_product_nor_quantity',
                 production=production.rec_name))
         if production.unit:
             default['uom'] = production.unit.id

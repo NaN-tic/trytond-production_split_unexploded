@@ -7,7 +7,7 @@ import os
 import io
 from configparser import ConfigParser
 
-MODULE = 'production_split'
+MODULE = 'production_split_unexploded'
 PREFIX = 'nantic'
 MODULE2PREFIX = {}
 
