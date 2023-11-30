@@ -8,7 +8,7 @@ def register():
     Pool.register(
         production.Production,
         production.SplitProductionStart,
-        module='production_split', type_='model')
+        module='production_split_unexploded', type_='model')
     Pool.register(
         production.SplitProduction,
-        module='production_split', type_='wizard')
+        module='production_split_unexploded', type_='wizard')

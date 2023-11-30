@@ -12,7 +12,7 @@ from trytond.modules.company.tests import create_company, set_company, CompanyTe
 
 class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
     'Test ProductionSplit module'
-    module = 'production_split'
+    module = 'production_split_unexploded'
 
     @with_transaction()
     def test0010split(self):
