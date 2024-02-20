@@ -45,6 +45,7 @@ class Production(metaclass=PoolMeta):
         """
         pool = Pool()
         Uom = pool.get('product.uom')
+        Production = pool.get('production')
 
         initial = remainder = Uom.compute_qty(self.unit, self.quantity, uom)
         if remainder <= quantity:
@@ -69,6 +70,8 @@ class Production(metaclass=PoolMeta):
                 output.product.default_uom,
                 round=False)
 
+        if not self.number:
+            Production.set_number([self])
         number = self.number
         state = self.state
         suffix = 2
