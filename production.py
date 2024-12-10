@@ -32,7 +32,7 @@ class Production(metaclass=PoolMeta):
     def split_key(self, move):
         return move.product.id
 
-    def split(self, quantity, uom, count=None):
+    def split(self, quantity, unit, count=None):
         """
         Split the production into productions of quantity.
         If count is not defined, the production will be split until the
@@ -47,7 +47,7 @@ class Production(metaclass=PoolMeta):
         Uom = pool.get('product.uom')
         Production = pool.get('production')
 
-        initial = remainder = Uom.compute_qty(self.unit, self.quantity, uom)
+        initial = remainder = Uom.compute_qty(self.unit, self.quantity, unit)
         if remainder <= quantity:
             # Splitted to quantity greater than produciton's quantity
             return [self]
@@ -80,36 +80,36 @@ class Production(metaclass=PoolMeta):
         if count:
             count -= 1
         productions = []
-        while ((remainder - quantity) >= uom.rounding  # remainder > quantity
+        while ((remainder - quantity) >= unit.rounding  # remainder > quantity
                 and (count or count is None)):
             productions.append(self._split_production(
-                    '%s-%02d' % (number, suffix), quantity, uom, input2qty,
+                    '%s-%02d' % (number, suffix), quantity, unit, input2qty,
                     output2qty))
             remainder -= quantity
             if count:
                 count -= 1
             suffix += 1
 
-        assert remainder > uom.rounding
+        assert remainder > unit.rounding
         # The initial production contains the remaining quantity
         productions.append(self._split_production(
-                '%s-%02d' % (number, suffix), quantity, uom, input2qty,
+                '%s-%02d' % (number, suffix), quantity, unit, input2qty,
                 output2qty))
         self.write([self], {
                 'number': '%s-%02d' % (number, 1),
-                'quantity': uom.round(remainder),
-                'unit': uom.id,
+                'quantity': unit.round(remainder),
+                'unit': unit.id,
                 'state': state,
                 })
         self.write(productions, {'state': state})
         productions.append(self)
         return productions
 
-    def _split_production(self, number, quantity, uom, input2qty, output2qty):
+    def _split_production(self, number, quantity, unit, input2qty, output2qty):
         production, = self.copy([self], {
                 'number': number,
                 'quantity': quantity,
-                'unit': uom.id,
+                'unit': unit.id,
                 'inputs': None,
                 'outputs': None,
                 })
