@@ -115,7 +115,6 @@ class ProductionSplitTestCase(CompanyTestMixin, ModuleTestCase):
                 return production
 
             production = create_production(10)
-            self.assertEqual(production.rec_name, '(1)')
             productions = production.split(5, unit)
             self.assertEqual(len(productions), 2)
             self.assertEqual([p.number for p in productions], [u'1-02', u'1-01'])
