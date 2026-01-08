@@ -108,6 +108,7 @@ class Production(metaclass=PoolMeta):
     def _split_production(self, number, quantity, unit, input2qty, output2qty):
         production, = self.copy([self], {
                 'number': number,
+                'reference': self.reference,
                 'quantity': quantity,
                 'unit': unit.id,
                 'inputs': None,
