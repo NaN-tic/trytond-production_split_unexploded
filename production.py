@@ -4,7 +4,7 @@ from trytond.model import ModelView, fields
 from trytond.wizard import Wizard, StateView, StateTransition, Button
 from trytond.pyson import Eval
 from trytond.pool import Pool, PoolMeta
-from trytond.transaction import Transaction
+from trytond.transaction import Transaction, without_check_access
 from trytond.i18n import gettext
 from trytond.exceptions import UserError
 
@@ -95,13 +95,14 @@ class Production(metaclass=PoolMeta):
         productions.append(self._split_production(
                 '%s-%02d' % (number, suffix), quantity, unit, input2qty,
                 output2qty))
-        self.write([self], {
-                'number': '%s-%02d' % (number, 1),
-                'quantity': unit.round(remainder),
-                'unit': unit.id,
-                'state': state,
-                })
-        self.write(productions, {'state': state})
+        with without_check_access():
+            self.write([self], {
+                    'number': '%s-%02d' % (number, 1),
+                    'quantity': unit.round(remainder),
+                    'unit': unit.id,
+                    'state': state,
+                    })
+            self.write(productions, {'state': state})
         productions.append(self)
         return productions
 
@@ -174,12 +175,13 @@ class Production(metaclass=PoolMeta):
 
         # Reset to draft before the changes to avoid control over don't modify
         # non-draft moves
-        if to_draft:
-            Move.write(to_draft, {'state': 'draft'})
-        if to_write:
-            Move.write(*to_write)
-        if reset_state:
-            Move.write(*reset_state)
+        with without_check_access():
+            if to_draft:
+                Move.write(to_draft, {'state': 'draft'})
+            if to_write:
+                Move.write(*to_write)
+            if reset_state:
+                Move.write(*reset_state)
 
 
 class SplitProductionStart(ModelView):
