@@ -1,0 +1,71 @@
+#
+msgid ""
+msgstr ""
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+msgctxt "field:production.split.start,count:"
+msgid "Count"
+msgstr "计数"
+
+msgctxt "field:production.split.start,id:"
+msgid "ID"
+msgstr "ID"
+
+msgctxt "field:production.split.start,quantity:"
+msgid "Quantity"
+msgstr "数量"
+
+msgctxt "field:production.split.start,unit_digits:"
+msgid "Unit Digits"
+msgstr "单位小数位数"
+
+msgctxt "field:production.split.start,uom:"
+msgid "Uom"
+msgstr "计量单位"
+
+msgctxt "field:production.split.start,uom_category:"
+msgid "Uom Category"
+msgstr "计量单位类别"
+
+msgctxt "help:production.split.start,count:"
+msgid "Maximum number of productions to create"
+msgstr "最多创建的生产单数量"
+
+msgctxt "model:ir.action,name:wizard_split_production"
+msgid "Split Production"
+msgstr "拆分生产"
+
+#, python-format
+msgctxt "model:ir.message,text:no_product_nor_quantity"
+msgid ""
+"Production \"%(production)s\" must have product and quantity defined in "
+"order to be splited."
+msgstr "生产“%(production)s”必须定义产品和数量才能拆分。"
+
+msgctxt "model:ir.model.button,string:split_wizard_button"
+msgid "Split"
+msgstr "拆分"
+
+msgctxt "model:production.split.start,name:"
+msgid "Split Production"
+msgstr "拆分生产"
+
+msgctxt "view:production.split.start:"
+msgid "Split Production"
+msgstr "拆分生产"
+
+msgctxt "view:production:"
+msgid "Split"
+msgstr "拆分"
+
+msgctxt "wizard_button:production.split,start,end:"
+msgid "Cancel"
+msgstr "取消"
+
+msgctxt "wizard_button:production.split,start,split:"
+msgid "Split"
+msgstr "拆分"
