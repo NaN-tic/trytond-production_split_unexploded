@@ -1,0 +1,73 @@
+#
+msgid ""
+msgstr ""
+"Language: hu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+msgctxt "field:production.split.start,count:"
+msgid "Count"
+msgstr "Megszámolás"
+
+msgctxt "field:production.split.start,id:"
+msgid "ID"
+msgstr "Azonosító"
+
+msgctxt "field:production.split.start,quantity:"
+msgid "Quantity"
+msgstr "Mennyiség"
+
+msgctxt "field:production.split.start,unit_digits:"
+msgid "Unit Digits"
+msgstr "Egység tizedesjegyei"
+
+msgctxt "field:production.split.start,uom:"
+msgid "Uom"
+msgstr "Mértékegység"
+
+msgctxt "field:production.split.start,uom_category:"
+msgid "Uom Category"
+msgstr "Mértékegység-kategória"
+
+msgctxt "help:production.split.start,count:"
+msgid "Maximum number of productions to create"
+msgstr "A létrehozandó gyártások maximális száma"
+
+msgctxt "model:ir.action,name:wizard_split_production"
+msgid "Split Production"
+msgstr "Gyártás felosztása"
+
+#, python-format
+msgctxt "model:ir.message,text:no_product_nor_quantity"
+msgid ""
+"Production \"%(production)s\" must have product and quantity defined in "
+"order to be splited."
+msgstr ""
+"A(z) „%(production)s” gyártás felosztásához meg kell adni a terméket és a "
+"mennyiséget."
+
+msgctxt "model:ir.model.button,string:split_wizard_button"
+msgid "Split"
+msgstr "Felosztás"
+
+msgctxt "model:production.split.start,name:"
+msgid "Split Production"
+msgstr "Gyártás felosztása"
+
+msgctxt "view:production.split.start:"
+msgid "Split Production"
+msgstr "Gyártás felosztása"
+
+msgctxt "view:production:"
+msgid "Split"
+msgstr "Felosztás"
+
+msgctxt "wizard_button:production.split,start,end:"
+msgid "Cancel"
+msgstr "Mégse"
+
+msgctxt "wizard_button:production.split,start,split:"
+msgid "Split"
+msgstr "Felosztás"
